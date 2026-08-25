@@ -1,4 +1,5 @@
 name: ⚡ CEVIOD Parallel Stream Transformer Engine Node
+run-name: 🎬 ${{ github.event.client_payload.title || github.event.client_payload.video_title || inputs.video_url || 'Video Stream' }} (${{ github.event.client_payload.quality || github.event.client_payload.target_quality || github.event.action || inputs.quality || '720p' }})
 
 on:
   repository_dispatch:

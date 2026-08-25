@@ -1,4 +1,5 @@
 name: rotototv3
+run-name: 📦 ${{ github.event.client_payload.title || github.event.client_payload.video_title || 'TeraBox File' }} (${{ github.event.client_payload.quality || github.event.action || '720p' }})
 
 on:
   repository_dispatch:
