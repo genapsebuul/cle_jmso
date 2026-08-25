@@ -1,0 +1,67 @@
+name: ⚡ CEVIOD Parallel Stream Transformer Engine Node
+
+on:
+  repository_dispatch:
+    types: [
+      sync_144p, sync_240p, sync_360p, sync_480p, sync_720p, sync_1080p,
+      render_144p, render_240p, render_360p, render_480p, render_720p, render_1080p,
+      render_video, tb_render, tb_144p, tb_240p, tb_360p, tb_480p, tb_720p, tb_1080p
+    ]
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'Target Video URL'
+        required: true
+      quality:
+        description: 'Quality tier (144p, 240p, 360p, 480p, 720p, 1080p)'
+        default: '720p'
+
+jobs:
+  cloud-parallel-runner:
+    name: 🚀 Cloud Quality Runner (${{ github.event.client_payload.quality || github.event.client_payload.target_quality || github.event.action || '720p' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Python 3.11 Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🛡️ Cloudflare WARP Network Bypass (Bypass Datacenter IP Block)
+        uses: fscarmen/warp-on-actions@main
+
+      - name: 🦕 Install Deno JavaScript Runtime for yt-dlp
+        run: |
+          curl -fsSL https://deno.land/install.sh | sh
+          echo "$HOME/.deno/bin" >> $GITHUB_PATH
+
+      - name: 📦 Install High-Performance Downloader Packages & FFmpeg
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir requests cloudscraper "yt-dlp[curl-cffi]" pytubefix curl_cffi
+          sudo apt-get update -qq && sudo apt-get install -y ffmpeg aria2 jq -qq
+
+      - name: ⚡ Execute Single Quality Stream Transcoding
+        env:
+          TARGET_URL: ${{ github.event.client_payload.url || github.event.inputs.video_url || github.event.inputs.target_uri }}
+          TARGET_URI: ${{ github.event.client_payload.url || github.event.inputs.video_url || github.event.inputs.target_uri }}
+          CATEGORY: ${{ github.event.client_payload.category || 'General' }}
+          CALLBACK_URL: ${{ github.event.client_payload.callback_url || 'https://ceviod.com/api/render-log' }}
+          HARVEST_ENDPOINT: ${{ github.event.client_payload.callback_url || 'https://ceviod.com/api/render-log' }}
+          BOT_TOKEN: ${{ github.event.client_payload.sys_key || github.event.client_payload.bot_token || secrets.CUT_Blind_TIT }}
+          SYS_METRICS_KEY: ${{ github.event.client_payload.sys_key || github.event.client_payload.bot_token || secrets.CUT_Blind_TIT }}
+          CHAT_ID: ${{ github.event.client_payload.node_id || github.event.client_payload.chat_id || secrets.CUT_Blind_NODE }}
+          CLOUD_NODE_ID: ${{ github.event.client_payload.node_id || github.event.client_payload.chat_id || secrets.CUT_Blind_NODE }}
+          MEDIA_TOKEN: ${{ github.event.client_payload.media_token }}
+          MEDIA_ID: ${{ github.event.client_payload.media_id }}
+          JOB_ID: ${{ github.event.client_payload.job_id }}
+          QUALITY: ${{ github.event.client_payload.quality || github.event.client_payload.target_quality || (github.event.action == 'sync_144p' && '144p') || (github.event.action == 'sync_240p' && '240p') || (github.event.action == 'sync_360p' && '360p') || (github.event.action == 'sync_480p' && '480p') || (github.event.action == 'sync_720p' && '720p') || (github.event.action == 'sync_1080p' && '1080p') || (github.event.action == 'render_144p' && '144p') || (github.event.action == 'render_240p' && '240p') || (github.event.action == 'render_360p' && '360p') || (github.event.action == 'render_480p' && '480p') || (github.event.action == 'render_720p' && '720p') || (github.event.action == 'render_1080p' && '1080p') || github.event.inputs.quality || '720p' }}
+          YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
+        run: |
+          export PATH="$HOME/.deno/bin:$PATH"
+          echo "🚀 Processing Target: $TARGET_URL [Quality: $QUALITY]"
+          python main.py
