@@ -321,9 +321,15 @@ STRATEGIES = []
 if tb_m3u8_path:
     STRATEGIES.append(['ffmpeg', '-y', '-protocol_whitelist', 'file,http,https,tcp,tls,crypto', '-i', tb_m3u8_path, '-c', 'copy', '/tmp/video.mp4'])
 
-fmt_str = f'bv*[height<={height}]+ba/bestvideo[height<={height}]+bestaudio/b[height<={height}]/bestvideo+bestaudio/best'
-fmt_fallback = f'bestvideo[height<={height}]+bestaudio/bestvideo+bestaudio/best[height<={height}]/best'
-sub_args = ['--ignore-errors', '--no-warnings']
+fmt_str = f'bv*[height<={height}]+(ba[language=id]/ba[language=ind]/ba[language^=id]/ba)/bestvideo[height<={height}]+(ba[language=id]/ba[language=ind]/ba[language^=id]/ba)/b[height<={height}]/bestvideo+bestaudio/best'
+fmt_fallback = f'bestvideo[height<={height}]+(ba[language=id]/ba[language=ind]/ba[language^=id]/ba)/bestvideo+bestaudio/best[height<={height}]/best'
+sub_args = [
+    '--ignore-errors', '--no-warnings',
+    '--write-subs', '--write-auto-subs',
+    '--sub-langs', 'id,id-id,id-orig,en.*',
+    '--sub-format', 'vtt/srt/best',
+    '--embed-subs'
+]
 
 STRATEGIES += [
     ['yt-dlp', '--ignore-errors', '--impersonate', 'chrome', '--js-runtimes', 'deno', '--remote-components', 'ejs:github', '--extractor-args', 'youtube:player_client=tv_embedded,web_creator,mweb',

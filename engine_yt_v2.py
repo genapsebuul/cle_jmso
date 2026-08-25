@@ -104,14 +104,16 @@ log_progress('downloading', 25, f'Mengunduh Youtube stream [{quality}] ({title[:
 
 fmt = f'bv*[height<={height}]+ba[language^=id]/bv*[height<={height}]+ba[language^=ind]/bv*[height<={height}]+ba/b[height<={height}]/bestvideo+bestaudio/best'
 
+sub_flags = ['--write-subs', '--write-auto-subs', '--sub-langs', 'id,id-id,id-orig,en.*', '--sub-format', 'vtt/srt/best', '--embed-subs']
+
 STRATEGIES = [
     ['yt-dlp', '--js-runtimes', 'deno', '--remote-components', 'ejs:github',
-     '-f', fmt, '--merge-output-format', 'mp4', '--no-playlist', '--no-check-certificates'] + cookie_args + ['-o', '/tmp/yt_raw.%(ext)s', target_uri],
+     '-f', fmt, '--merge-output-format', 'mp4', '--no-playlist', '--no-check-certificates'] + sub_flags + cookie_args + ['-o', '/tmp/yt_raw.%(ext)s', target_uri],
 
     ['yt-dlp', '--js-runtimes', 'deno', '--remote-components', 'ejs:github',
-     '-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--no-playlist', '--no-check-certificates'] + cookie_args + ['-o', '/tmp/yt_raw.%(ext)s', target_uri],
+     '-f', 'bestvideo+bestaudio/best', '--merge-output-format', 'mp4', '--no-playlist', '--no-check-certificates'] + sub_flags + cookie_args + ['-o', '/tmp/yt_raw.%(ext)s', target_uri],
 
-    ['yt-dlp', '-f', 'best', '--merge-output-format', 'mp4', '--no-playlist', '--no-check-certificates'] + cookie_args + ['-o', '/tmp/yt_raw.%(ext)s', target_uri]
+    ['yt-dlp', '-f', 'best', '--merge-output-format', 'mp4', '--no-playlist', '--no-check-certificates'] + sub_flags + cookie_args + ['-o', '/tmp/yt_raw.%(ext)s', target_uri]
 ]
 
 raw_file = None
