@@ -1,0 +1,38 @@
+name: CEVIOD Manual Upload Auto-Transcode & Thumbnail
+
+on:
+  repository_dispatch:
+    types: [manual_transcode]
+
+jobs:
+  transcode-manual-upload:
+    name: Transcode Manual Video
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install --no-cache-dir requests
+          sudo apt-get update -qq && sudo apt-get install -y ffmpeg -qq
+
+      - name: Detect Quality, Generate Thumbnail & Transcode Downward
+        env:
+          BOT_TOKEN: ${{ github.event.client_payload.bot_token || secrets.CUT_Blind_TIT }}
+          CHAT_ID: ${{ github.event.client_payload.chat_id || secrets.CUT_Blind_NODE }}
+          CALLBACK_URL: ${{ github.event.client_payload.callback_url || 'https://ceviod.com/api/render-log' }}
+          VIDEO_TITLE: ${{ github.event.client_payload.title || 'Untitled Video' }}
+          CATEGORY: ${{ github.event.client_payload.category || 'video' }}
+          PARTS_IDS: ${{ github.event.client_payload.parts_ids }}
+          CREATOR_USERNAME: ${{ github.event.client_payload.creator_username || 'admin' }}
+          CREATOR_NAME: ${{ github.event.client_payload.creator_name || 'CEVIOD Creator' }}
+          MEDIA_ID: ${{ github.event.client_payload.media_id }}
+        run: python manual_transcode.py
